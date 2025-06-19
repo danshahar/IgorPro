@@ -39,7 +39,7 @@ public class IgorProVM: ObservableObject {
     }
     
     public func getSampleName() -> String {
-        return "Hello, World!"
+        return itx.baseName ?? "No baseName"
     }
 }
 
