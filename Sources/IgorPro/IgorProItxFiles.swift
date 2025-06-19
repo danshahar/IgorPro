@@ -22,7 +22,6 @@ public struct IgorProItxFiles {
      var textToSave: String = ""
     
      private(set) var itxFilesList: [String] = []
-     private(set) var activeFileName: String = ""
      private(set) var nextFileName: String = ""
      var waveNames: [String] = []
      private(set) var fileNumber: String = "000"
@@ -76,6 +75,7 @@ public struct IgorProItxFiles {
                if let fileNumber = getLastFileNumber(using: sampleName) {
                    let newFileNumber: String = String(format: "%03d",(Int(fileNumber)! + 1))
                    self.fileNumber = newFileNumber
+                   print("File number: \(newFileNumber)")
                    return "\(sampleName)_\(newFileNumber).itx"
                } else {
                    print("No previous file found")
@@ -101,8 +101,27 @@ public struct IgorProItxFiles {
         }
         itxFilesList = getListOfItxFiles() ?? ["No files found"]
         nextFileName = makeNextFileName()
+        print("Next file name: \(nextFileName)")
     }
+   
+    public mutating func autoSaveItxToICloud( text: String) {
+        guard let iCloudDir = iCloudURL else {
+            print("iCloud not available")
+            return
+        }
 
+        let fileURL = iCloudDir.appendingPathComponent(nextFileName)
+        do {
+            try FileManager.default.createDirectory(at: iCloudDir, withIntermediateDirectories: true)
+            try text.write(to: fileURL, atomically: true, encoding: .utf8)
+            print("File saved to iCloud at \(fileURL)")
+        } catch {
+            print("Error saving to iCloud:", error)
+        }
+        itxFilesList = getListOfItxFiles() ?? ["No files found"]
+        nextFileName = makeNextFileName()
+        print("Next file name: \(nextFileName)")
+    }
    
     public mutating func deleteFile(_ fileName: String) {
         guard let iCloudDir = iCloudURL else {
@@ -117,6 +136,7 @@ public struct IgorProItxFiles {
                 print("Failed to delete file.")
             }
             itxFilesList = getListOfItxFiles() ?? ["No files found"]
+            nextFileName = makeNextFileName()
         
     }
     
@@ -138,10 +158,7 @@ public struct IgorProItxFiles {
             return fileList
         }
 
-    public func getActiveFileName() -> String {
-            return activeFileName
-        }
-        
+         
     public func getItxFilesList() -> [String] {
             return itxFilesList
         }

@@ -12,35 +12,59 @@ public class IgorProVM: ObservableObject {
 
     @Published var baseName: String = ""
     @Published var displayItxFilesList: [String] = []
-    @Published var activeFileName: String = ""
-    @Published var nextFileName: String = ""
- //   @Published var iCloudURL = URL(fileURLWithPath: "")
+    @Published public var nextFileName: String = "Sample_000.itx"
  
     public init() {
-//        iCloudURL = getURLFromiCloud() ?? URL(fileURLWithPath: "no iCloud")
-//        print(iCloudURL)
     }
     
     //MARK: Intents
 
     public func setBaseName(_ name: String) {
         itx.setBaseName(name)
-        activeFileName = itx.makeNextFileName()
+       // activeFileName = itx.makeNextFileName()
         if let tempFileList  = itx.getListOfItxFiles() {
             displayItxFilesList = tempFileList.filter {$0.hasPrefix(baseName)}
-            nextFileName = itx.makeNextFileName()
+            nextFileName = itx.nextFileName
         }
-        print(itx.getActiveFileName())
     }
     
-    public func deleteItxFile(_ name: String) {
+    public func autoSaveItxFile(text: String) {
+        itx.autoSaveItxToICloud(text: "testing")
+        displayItxFilesList = itx.getItxFilesList()
+        nextFileName = itx.nextFileName
+    }
+    //MARK: - Deleting
+    public func deleteAllItxFile() {
+        for name in itx.getItxFilesList() {
+            itx.deleteFile(name)
+        }
+        displayItxFilesList = itx.getItxFilesList()
+        nextFileName = itx.nextFileName
+    }
+    public func deleteLastItxFile() {
+        if let fileToDelete = getFileNameList().first {
+            print("Deleting: \(fileToDelete)")
+            deleteItxFile(fileToDelete)
+        } else {
+            print("No file to delete")
+        }
+    }
+    
+   public func deleteItxFile(_ name: String) {
         itx.deleteFile(name)
         displayItxFilesList = itx.getItxFilesList()
+        nextFileName = itx.nextFileName
     }
     
-    public func getSampleName() -> String {
-        return "Hello, World!"
+    //MARK: - Getters
+    
+    public func getNextFileName() -> String {
+        return itx.nextFileName
     }
+    public func getFileNameList() -> [String] {
+        return displayItxFilesList
+    }
+
 }
 
 
