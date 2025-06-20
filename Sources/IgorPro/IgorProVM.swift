@@ -8,9 +8,9 @@
 import SwiftUI
 
 public class IgorProVM: ObservableObject {
-    private var itx = IgorProItxFiles()
+    public var itx = IgorProItxFiles()
 
-    @Published var baseName: String = ""
+    @Published public var baseName: String = ""
     @Published var displayItxFilesList: [String] = []
     @Published public var nextFileName: String = "Sample_000.itx"
  

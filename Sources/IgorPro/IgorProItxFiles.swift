@@ -18,13 +18,13 @@ import Foundation
 /// Use to handle IgorPro text files
 public struct IgorProItxFiles {
      
-     var baseName: String?
+     public var baseName: String?
      var textToSave: String = ""
     
      private(set) var itxFilesList: [String] = []
      private(set) var nextFileName: String = ""
      var waveNames: [String] = []
-     private(set) var fileNumber: String = "000"
+     public var fileNumber: String = "000"
  
     let iCloudURL = FileManager.default.url(forUbiquityContainerIdentifier: nil)?
                      .appendingPathComponent("Documents")
