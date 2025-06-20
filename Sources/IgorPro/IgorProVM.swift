@@ -29,10 +29,11 @@ public class IgorProVM: ObservableObject {
     }
     
     public func autoSaveItxFile(text: String) {
-        itx.autoSaveItxToICloud(text: "testing")
+        itx.autoSaveItxToICloud(text: text)
         displayItxFilesList = itx.getItxFilesList()
         nextFileName = itx.nextFileName
     }
+    
     //MARK: - Deleting
     public func deleteAllItxFile() {
         for name in itx.getItxFilesList() {
