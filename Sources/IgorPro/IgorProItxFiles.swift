@@ -19,17 +19,15 @@ import Foundation
 public struct IgorProItxFiles {
      
      public var baseName: String?
+     
      var textToSave: String = ""
-    
      private(set) var itxFilesList: [String] = []
      private(set) var nextFileName: String = ""
-     var waveNames: [String] = []
-     public var fileNumber: String = "000"
- 
-    let iCloudURL = FileManager.default.url(forUbiquityContainerIdentifier: nil)?
+     private var waveNames: [String] = []
+     
+     let iCloudURL = FileManager.default.url(forUbiquityContainerIdentifier: nil)?
                      .appendingPathComponent("Documents")
      
-
     /// if exists, get last file number as nnn, and sets baseName
     /// - Parameter path: documentDirectory
     /// - Returns: File number  as String
@@ -65,6 +63,7 @@ public struct IgorProItxFiles {
     /// - Parameter baseName: used to create file names: baseName_nnn.itx
     public mutating func setBaseName(_ baseName: String) {
         self.baseName = baseName
+        UserDefaults.standard.set(baseName, forKey: "baseName")
         nextFileName = makeNextFileName()
       }
     
@@ -74,7 +73,6 @@ public struct IgorProItxFiles {
            if let sampleName = baseName {  //we have a baseName
                if let fileNumber = getLastFileNumber(using: sampleName) {
                    let newFileNumber: String = String(format: "%03d",(Int(fileNumber)! + 1))
-                   self.fileNumber = newFileNumber
                    print("File number: \(newFileNumber)")
                    return "\(sampleName)_\(newFileNumber).itx"
                } else {
@@ -85,13 +83,18 @@ public struct IgorProItxFiles {
            return ""
         }
  
-    public mutating func saveItxToICloud(fileName: String, text: String) {
+    public mutating func autoSaveItxToICloud(fileName: String?, text: String) {
+        var fileURL: URL = URL(fileURLWithPath: "")
         guard let iCloudDir = iCloudURL else {
             print("iCloud not available")
             return
         }
-
-        let fileURL = iCloudDir.appendingPathComponent(fileName)
+        if let fileName = fileName {
+             fileURL = iCloudDir.appendingPathComponent(fileName)
+        } else {
+             fileURL = iCloudDir.appendingPathComponent(nextFileName)
+        }
+        
         do {
             try FileManager.default.createDirectory(at: iCloudDir, withIntermediateDirectories: true)
             try text.write(to: fileURL, atomically: true, encoding: .utf8)
@@ -101,27 +104,8 @@ public struct IgorProItxFiles {
         }
         itxFilesList = getListOfItxFiles() ?? ["No files found"]
         nextFileName = makeNextFileName()
-        print("Next file name: \(nextFileName)")
     }
-   
-    public mutating func autoSaveItxToICloud( text: String) {
-        guard let iCloudDir = iCloudURL else {
-            print("iCloud not available")
-            return
-        }
-
-        let fileURL = iCloudDir.appendingPathComponent(nextFileName)
-        do {
-            try FileManager.default.createDirectory(at: iCloudDir, withIntermediateDirectories: true)
-            try text.write(to: fileURL, atomically: true, encoding: .utf8)
-            print("File saved to iCloud at \(fileURL)")
-        } catch {
-            print("Error saving to iCloud:", error)
-        }
-        itxFilesList = getListOfItxFiles() ?? ["No files found"]
-        nextFileName = makeNextFileName()
-        print("Next file name: \(nextFileName)")
-    }
+    
    
     public mutating func deleteFile(_ fileName: String) {
         guard let iCloudDir = iCloudURL else {
@@ -137,21 +121,20 @@ public struct IgorProItxFiles {
             }
             itxFilesList = getListOfItxFiles() ?? ["No files found"]
             nextFileName = makeNextFileName()
-        
     }
     
-    public  func getListOfItxFiles() -> [String]? {
+    public func getListOfItxFiles() -> [String]? {
             var fileList: [String] = []
-            guard let iCloudDir = iCloudURL else {
+
+        guard let iCloudDir = iCloudURL else {
                 print("iCloud not available")
                 return nil
             }
            do {
                fileList = try FileManager.default.contentsOfDirectory(atPath: iCloudDir.path)
-                    .sorted { $0 > $1 }
                     .filter { $0.hasSuffix(".itx") }
- 
-           } catch {
+                    .sorted { $0 > $1 }
+              } catch {
                 print("Error reading directory: \(error)")
                 return nil
             }
