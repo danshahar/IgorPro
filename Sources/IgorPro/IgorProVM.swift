@@ -10,9 +10,10 @@ import SwiftUI
 public class IgorProVM: ObservableObject {
     public var itx = IgorProItxFiles()
 
-    @Published public var baseName: String = (UserDefaults.standard.string(forKey: "baseName") ?? "Sample")
+    @Published public var baseName: String?
     @Published public var displayItxFilesList: [String] = []
     @Published public var nextFileName: String?
+    @Published public var nextFileNumber: String?
  
     public init() {
         nextFileName = itx.nextFileName
@@ -23,7 +24,7 @@ public class IgorProVM: ObservableObject {
     public func setBaseName(_ name: String) {
         itx.setBaseName(name)
         if let tempFileList  = itx.getListOfItxFiles() {
-            displayItxFilesList = tempFileList.filter {$0.hasPrefix(baseName)}
+            displayItxFilesList = tempFileList.filter {$0.hasPrefix(name)}
             nextFileName = itx.nextFileName
         }
     }
@@ -61,13 +62,23 @@ public class IgorProVM: ObservableObject {
     
     //MARK: - Getters
     
-    public func getNextFileName() -> String {
-        return itx.nextFileName
+    public func getNextFileName() -> String? {
+        if let nextName = itx.nextFileName {
+            return nextName
+        }
+        return nil
     }
+        
     public func getFileNameList() -> [String] {
         return displayItxFilesList
     }
-
+    public func getNextFileNumber() -> String? {
+        print(itx.nextFileName)
+        if let nextName = itx.nextFileName {
+            return nextName.components(separatedBy: "_")[1]
+        }
+        return "000"
+    }
 }
 
 
