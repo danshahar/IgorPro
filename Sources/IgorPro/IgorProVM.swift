@@ -14,6 +14,8 @@ public class IgorProVM: ObservableObject {
     @Published public var displayItxFilesList: [String] = []
     @Published public var nextFileName: String?
     @Published public var nextFileNumber: String?
+    
+    var textToSave: String?
  
     public init() {
         nextFileName = itx.nextFileName
@@ -35,29 +37,7 @@ public class IgorProVM: ObservableObject {
         itx.autoSaveItxToICloud(fileName: nil, text: text)
         displayItxFilesList = itx.getItxFilesList()
         nextFileName = itx.nextFileName
-    }
-    
-    //MARK: - Deleting
-    public func deleteAllItxFile() {
-        for name in itx.getItxFilesList() {
-            itx.deleteFile(name)
-        }
-        displayItxFilesList = itx.getItxFilesList()
-        nextFileName = itx.nextFileName
-    }
-    public func deleteLastItxFile() {
-        if let fileToDelete = getFileNameList().first {
-            print("Deleting: \(fileToDelete)")
-            deleteItxFile(fileToDelete)
-        } else {
-            print("No file to delete")
-        }
-    }
-    
-   public func deleteItxFile(_ name: String) {
-        itx.deleteFile(name)
-        displayItxFilesList = itx.getItxFilesList()
-        nextFileName = itx.nextFileName
+        print("autosave")
     }
     
     //MARK: - Getters
@@ -72,13 +52,39 @@ public class IgorProVM: ObservableObject {
     public func getFileNameList() -> [String] {
         return displayItxFilesList
     }
+    
+    //FIXME: work properly with optional
     public func getNextFileNumber() -> String? {
-        print(itx.nextFileName)
         if let nextName = itx.nextFileName {
             return nextName.components(separatedBy: "_")[1]
+                .replacingOccurrences(of: ".itx", with: "")
         }
         return "000"
     }
+    
+    //MARK: - Deleting
+    public func deleteAllItxFile() {
+        for name in itx.getItxFilesList() {
+            itx.deleteFile(name)
+        }
+        displayItxFilesList = itx.getItxFilesList()
+        nextFileName = itx.nextFileName
+    }
+    public func deleteLastItxFile() {
+        if let fileToDelete = getFileNameList().first {
+            print("Deleting: \(fileToDelete)")
+            deleteItxFile(name: fileToDelete)
+        } else {
+            print("No file to delete")
+        }
+    }
+    
+   public func deleteItxFile(name: String) {
+        itx.deleteFile(name)
+        displayItxFilesList = itx.getItxFilesList()
+        nextFileName = itx.nextFileName
+    }
+
 }
 
 

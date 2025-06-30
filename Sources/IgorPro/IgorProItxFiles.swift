@@ -32,13 +32,37 @@ public struct IgorProItxFiles {
          nextFileName = makeNextFileName()
     }
  
+    //MARK: - Saving
+    public mutating func autoSaveItxToICloud(fileName: String?, text: String) {
+        var fileURL: URL = URL(fileURLWithPath: "")
+        guard let iCloudDir = iCloudURL else {
+            print("iCloud not available")
+            return
+        }
+        if let fileName = fileName {
+             fileURL = iCloudDir.appendingPathComponent(fileName)
+        } else {
+            if let nextFileName = nextFileName {
+                fileURL = iCloudDir.appendingPathComponent(nextFileName)
+            }
+        }
+        
+        do {
+            try FileManager.default.createDirectory(at: iCloudDir, withIntermediateDirectories: true)
+            try text.write(to: fileURL, atomically: true, encoding: .utf8)
+            print("File saved to iCloud at \(fileURL)")
+        } catch {
+            print("Error saving to iCloud:", error)
+        }
+        itxFilesList = getListOfItxFiles() ?? ["No files found"]
+        nextFileName = makeNextFileName()
+    }
     
     /// if exists, get last file number as nnn, and sets baseName
     /// - Parameter path: documentDirectory
     /// - Returns: File number  as String
     public mutating func getLastFileNumber(using sampleName: String) -> String? {
         var lastFileNumber: String?
-        var listFiles: [String] = []
 
         if let listFiles = getListOfItxFiles() {
                 print(listFiles)
@@ -116,32 +140,7 @@ public struct IgorProItxFiles {
             return baseName
         }
     
-    //MARK: - Saving
-    public mutating func autoSaveItxToICloud(fileName: String?, text: String) {
-        var fileURL: URL = URL(fileURLWithPath: "")
-        guard let iCloudDir = iCloudURL else {
-            print("iCloud not available")
-            return
-        }
-        if let fileName = fileName {
-             fileURL = iCloudDir.appendingPathComponent(fileName)
-        } else {
-            if let nextFileName = nextFileName {
-                fileURL = iCloudDir.appendingPathComponent(nextFileName)
-            }
-        }
-        
-        do {
-            try FileManager.default.createDirectory(at: iCloudDir, withIntermediateDirectories: true)
-            try text.write(to: fileURL, atomically: true, encoding: .utf8)
-            print("File saved to iCloud at \(fileURL)")
-        } catch {
-            print("Error saving to iCloud:", error)
-        }
-        itxFilesList = getListOfItxFiles() ?? ["No files found"]
-        nextFileName = makeNextFileName()
-    }
-    
+   
    
     public mutating func deleteFile(_ fileName: String) {
         guard let iCloudDir = iCloudURL else {
