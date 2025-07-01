@@ -12,13 +12,13 @@ public class IgorProVM: ObservableObject {
 
     @Published public var baseName: String?
     @Published public var displayItxFilesList: [String] = []
-    @Published public var nextFileName: String?
+    @Published public var displayNextFileName: String?
     @Published public var nextFileNumber: String?
     
     var textToSave: String?
  
     public init() {
-        nextFileName = itx.nextFileName
+        displayNextFileName = itx.nextFileName
     }
     
     //MARK: Intents
@@ -27,7 +27,7 @@ public class IgorProVM: ObservableObject {
         itx.setBaseName(name)
         if let tempFileList  = itx.getListOfItxFiles() {
             displayItxFilesList = tempFileList.filter {$0.hasPrefix(name)}
-            nextFileName = itx.nextFileName
+            displayNextFileName = itx.nextFileName
         }
     }
     
@@ -35,9 +35,8 @@ public class IgorProVM: ObservableObject {
     /// - Parameter text: itx format data
     public func autoSaveItxFile(text: String) {
         itx.autoSaveItxToICloud(fileName: nil, text: text)
-        displayItxFilesList = itx.getItxFilesList()
-        nextFileName = itx.nextFileName
-        print("autosave")
+        displayItxFilesList = itx.itxFilesList
+        displayNextFileName = itx.nextFileName
     }
     
     //MARK: - Getters
@@ -49,10 +48,6 @@ public class IgorProVM: ObservableObject {
         return nil
     }
         
-    public func getFileNameList() -> [String] {
-        return displayItxFilesList
-    }
-    
     //FIXME: work properly with optional
     public func getNextFileNumber() -> String? {
         if let nextName = itx.nextFileName {
@@ -64,14 +59,14 @@ public class IgorProVM: ObservableObject {
     
     //MARK: - Deleting
     public func deleteAllItxFile() {
-        for name in itx.getItxFilesList() {
+        for name in itx.itxFilesList {
             itx.deleteFile(name)
         }
-        displayItxFilesList = itx.getItxFilesList()
-        nextFileName = itx.nextFileName
+        displayItxFilesList = itx.itxFilesList
+        displayNextFileName = itx.nextFileName
     }
     public func deleteLastItxFile() {
-        if let fileToDelete = getFileNameList().first {
+        if let fileToDelete = itx.itxFilesList.first {
             print("Deleting: \(fileToDelete)")
             deleteItxFile(name: fileToDelete)
         } else {
@@ -81,8 +76,8 @@ public class IgorProVM: ObservableObject {
     
    public func deleteItxFile(name: String) {
         itx.deleteFile(name)
-        displayItxFilesList = itx.getItxFilesList()
-        nextFileName = itx.nextFileName
+        displayItxFilesList = itx.itxFilesList
+        displayNextFileName = itx.nextFileName
     }
 
 }
